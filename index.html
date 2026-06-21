@@ -561,8 +561,8 @@
     body:not(.lang-es) [data-lang="en"] { display: block !important; }
     body:not(.lang-es) span[data-lang="en"], body:not(.lang-es) a[data-lang="en"]:not(.nav-links li a) { display: inline-flex !important; }
 
-    /* NAV LINKS: visibility controlled entirely via JavaScript, see setLang() and resize listener */
-    nav .nav-links li a[data-lang="en"], nav .nav-links li a[data-lang="es"] { display: none; }
+    /* NAV LINKS: hidden by default, shown only on desktop via media query below */
+    .nav-link-item { display: none; }
 
     /* RESPONSIVE */
     @media (max-width: 900px) {
@@ -614,6 +614,10 @@
       .lang-btn { font-size: 0.58rem; padding: 0.24rem 0.38rem; }
       nav { padding: 0.8rem 0.8rem; }
     }
+
+    @media (min-width: 901px) {
+      .nav-link-item { display: inline-block !important; }
+    }
   </style>
 </head>
 <body>
@@ -621,10 +625,10 @@
   <nav>
     <a href="#" class="nav-logo">Camilo Lopez-Sanchez</a>
     <ul class="nav-links">
-      <li><a href="#about" data-lang="en">About</a><a href="#about" data-lang="es">Sobre m&iacute;</a></li>
-      <li><a href="#work" data-lang="en">Work</a><a href="#work" data-lang="es">Trabajo</a></li>
-      <li><a href="#services" data-lang="en">Services</a><a href="#services" data-lang="es">Servicios</a></li>
-      <li><a href="#contact" data-lang="en">Contact</a><a href="#contact" data-lang="es">Contacto</a></li>
+      <li><a href="#about" class="nav-link-item" data-en="About" data-es="Sobre m&iacute;">About</a></li>
+      <li><a href="#work" class="nav-link-item" data-en="Work" data-es="Trabajo">Work</a></li>
+      <li><a href="#services" class="nav-link-item" data-en="Services" data-es="Servicios">Services</a></li>
+      <li><a href="#contact" class="nav-link-item" data-en="Contact" data-es="Contacto">Contact</a></li>
       <li class="lang-toggle">
         <button class="lang-btn" data-lang-btn="en">&#127468;&#127463; EN</button>
         <button class="lang-btn" data-lang-btn="es">&#127466;&#127480; ES</button>
@@ -918,13 +922,8 @@
     // Language toggle
     function updateNavLinks() {
       const lang = document.body.classList.contains('lang-es') ? 'es' : 'en';
-      const isMobile = window.innerWidth <= 900;
-      document.querySelectorAll('nav .nav-links li a[data-lang]').forEach(a => {
-        if (isMobile) {
-          a.style.display = 'none';
-        } else {
-          a.style.display = (a.dataset.lang === lang) ? 'inline-block' : 'none';
-        }
+      document.querySelectorAll('.nav-link-item').forEach(a => {
+        a.textContent = lang === 'es' ? a.dataset.es : a.dataset.en;
       });
     }
 
@@ -942,7 +941,6 @@
     let savedLang = 'en';
     try { savedLang = localStorage.getItem('site-lang') || 'en'; } catch(e) {}
     setLang(savedLang);
-    window.addEventListener('resize', updateNavLinks);
 
     // Before/after slider
     (function() {
