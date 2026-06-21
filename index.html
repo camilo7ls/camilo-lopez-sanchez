@@ -556,20 +556,21 @@
     /* LANG */
     body.lang-es [data-lang="en"] { display: none !important; }
     body.lang-es [data-lang="es"] { display: block !important; }
-    body.lang-es span[data-lang="es"], body.lang-es a[data-lang="es"] { display: inline-flex !important; }
+    body.lang-es span[data-lang="es"], body.lang-es a[data-lang="es"]:not(.nav-links li a) { display: inline-flex !important; }
     body:not(.lang-es) [data-lang="es"] { display: none !important; }
     body:not(.lang-es) [data-lang="en"] { display: block !important; }
-    body:not(.lang-es) span[data-lang="en"], body:not(.lang-es) a[data-lang="en"] { display: inline-flex !important; }
-    nav .nav-links li a[data-lang="en"], nav .nav-links li a[data-lang="es"] { display: inline-block !important; }
-    body.lang-es nav .nav-links li a[data-lang="en"] { display: none !important; }
-    body:not(.lang-es) nav .nav-links li a[data-lang="es"] { display: none !important; }
+    body:not(.lang-es) span[data-lang="en"], body:not(.lang-es) a[data-lang="en"]:not(.nav-links li a) { display: inline-flex !important; }
+
+    /* NAV LINKS: visibility controlled entirely via JavaScript, see setLang() and resize listener */
+    nav .nav-links li a[data-lang="en"], nav .nav-links li a[data-lang="es"] { display: none; }
 
     /* RESPONSIVE */
     @media (max-width: 900px) {
-      nav { padding: 1.1rem 1.3rem; }
-      .nav-links { gap: 0.8rem; }
-      .nav-links a:not(.lang-toggle) { display: none; }
-      .nav-logo { font-size: 0.85rem; }
+      nav { padding: 0.9rem 1rem; }
+      .nav-links { gap: 0.5rem; }
+      .nav-links li.lang-toggle { display: flex !important; }
+      .nav-logo { font-size: 0.78rem; white-space: nowrap; }
+      .lang-btn { font-size: 0.62rem; padding: 0.28rem 0.45rem; }
 
       section { padding: 4.5rem 1.5rem; }
 
@@ -609,6 +610,9 @@
       .hero-title { font-size: 2.3rem; }
       .section-title { font-size: 1.7rem; }
       .number-value { font-size: 1.7rem; }
+      .nav-logo { font-size: 0.68rem; }
+      .lang-btn { font-size: 0.58rem; padding: 0.24rem 0.38rem; }
+      nav { padding: 0.8rem 0.8rem; }
     }
   </style>
 </head>
@@ -622,8 +626,8 @@
       <li><a href="#services" data-lang="en">Services</a><a href="#services" data-lang="es">Servicios</a></li>
       <li><a href="#contact" data-lang="en">Contact</a><a href="#contact" data-lang="es">Contacto</a></li>
       <li class="lang-toggle">
-        <button class="lang-btn" data-lang-btn="en">EN</button>
-        <button class="lang-btn" data-lang-btn="es">ES</button>
+        <button class="lang-btn" data-lang-btn="en">&#127468;&#127463; EN</button>
+        <button class="lang-btn" data-lang-btn="es">&#127466;&#127480; ES</button>
       </li>
     </ul>
   </nav>
@@ -912,12 +916,25 @@
     reveals.forEach(el => observer.observe(el));
 
     // Language toggle
+    function updateNavLinks() {
+      const lang = document.body.classList.contains('lang-es') ? 'es' : 'en';
+      const isMobile = window.innerWidth <= 900;
+      document.querySelectorAll('nav .nav-links li a[data-lang]').forEach(a => {
+        if (isMobile) {
+          a.style.display = 'none';
+        } else {
+          a.style.display = (a.dataset.lang === lang) ? 'inline-block' : 'none';
+        }
+      });
+    }
+
     function setLang(lang) {
       document.body.classList.toggle('lang-es', lang === 'es');
       document.querySelectorAll('.lang-btn').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.langBtn === lang);
       });
       try { localStorage.setItem('site-lang', lang); } catch(e) {}
+      updateNavLinks();
     }
     document.querySelectorAll('.lang-btn').forEach(btn => {
       btn.addEventListener('click', () => setLang(btn.dataset.langBtn));
@@ -925,6 +942,7 @@
     let savedLang = 'en';
     try { savedLang = localStorage.getItem('site-lang') || 'en'; } catch(e) {}
     setLang(savedLang);
+    window.addEventListener('resize', updateNavLinks);
 
     // Before/after slider
     (function() {
